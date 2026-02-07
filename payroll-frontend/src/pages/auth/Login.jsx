@@ -4,46 +4,69 @@ import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("EMPLOYEE");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // 🔴 MOCK LOGIN (backend will validate later)
-    login(role);
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (role === "EMPLOYEE") navigate("/employee/dashboard");
-    if (role === "MANAGER") navigate("/manager/dashboard");
-    if (role === "HR") navigate("/admin/dashboard");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      // ✅ real login
+      login({
+        token: data.token,
+        role: data.role,
+      });
+
+      // role-based redirect (from backend)
+      if (data.role === "EMPLOYEE") navigate("/employee/dashboard");
+      if (data.role === "MANAGER") navigate("/manager/dashboard");
+      if (data.role === "HR") navigate("/admin/dashboard");
+    } catch (err) {
+      setError("Server not reachable");
+    }
   };
 
   return (
     <div className="container">
       <h2>Login</h2>
 
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="employee@company.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-        <div>
-          <label>Role</label>
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="EMPLOYEE">Employee</option>
-            <option value="MANAGER">Manager</option>
-            <option value="HR">HR</option>
-          </select>
-        </div>
+      <form onSubmit={handleLogin}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
         <button type="submit">Login</button>
       </form>
