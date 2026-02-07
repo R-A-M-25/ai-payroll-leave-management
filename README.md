@@ -1,238 +1,246 @@
 # AI-Enhanced Employee Payroll & Leave Management System
 
-## 📌 Project Status (Current Milestone)
+## Project Overview
 
-**Phase:** Authentication & Authorization (COMPLETED ✅)
+This project is a **secure, role-based employee management system** built to demonstrate how real-world backend systems are designed before adding business features. The work completed so far focuses on **authentication, authorization, organizational hierarchy, and a complete leave management workflow**.
 
-This project is an enterprise-style full-stack web application designed to manage employee payroll and leave workflows. The foundation of the system — authentication, authorization, and security — has been fully implemented and verified end-to-end.
-
-> ⚠️ Business modules (Leave Management, Payroll Processing, AI/NLP features) are **planned and pending**. This README reflects the project **up to the current stable checkpoint**.
+This README explains **what has been implemented and how it works**, without going into code or folder-level details.
 
 ---
 
-## 🧩 Tech Stack
+## What Has Been Built So Far
 
-### Frontend
+So far, the project includes:
 
-* **React.js** – Component-based UI
-* **React Router** – Client-side routing
-* **Context API** – Global authentication state
-* **LocalStorage** – Session persistence
+* Secure authentication using JWT
+* Role-based authorization enforced at backend level
+* Separation of authentication data and business data
+* Organization hierarchy (manager–employee mapping)
+* Complete leave management workflow
 
-### Backend
-
-* **Node.js** – Runtime environment
-* **Express.js** – REST API framework
-* **JWT (jsonwebtoken)** – Stateless authentication
-* **bcrypt** – Secure password hashing
-
-### Database
-
-* **PostgreSQL** – Relational database
+All of these are **fully working and tested end-to-end**.
 
 ---
 
-## 🏗️ Architecture Overview
+## Authentication: What We Did and How
+
+### What was done
+
+* Implemented login using email and password
+* Passwords are stored only in **hashed form**
+* Backend generates a JWT token after successful login
+
+### How it works
 
 ```
-React Frontend
-   │
-   │ (email, password)
-   ▼
-Express Backend (Auth API)
-   │
-   │ bcrypt.compare()
-   ▼
-PostgreSQL (users, roles)
-   │
-   │ JWT issued (userId, role)
-   ▼
-Frontend (stores token + role)
-   │
-   ▼
-Protected Backend APIs (JWT Middleware)
+User enters credentials
+        ↓
+Backend verifies password securely
+        ↓
+JWT token is generated (userId + role)
+        ↓
+Client stores token
+        ↓
+Token is sent with every protected request
 ```
+
+### Why this approach
+
+* Prevents password leaks
+* Stateless authentication (scalable)
+* Backend never trusts frontend alone
 
 ---
 
-## 🔐 Authentication & Authorization (Implemented)
+## Authorization (Role-Based Access Control)
 
-### Authentication Flow
+### What was done
 
-1. User logs in with **email + password**
-2. Backend validates credentials using **bcrypt**
-3. On success, backend issues a **JWT** containing:
+* Defined clear user roles
+* Enforced role checks on every protected API
 
-   * `userId`
-   * `role`
-   * `iat`, `exp`
-4. Frontend stores JWT and role in **localStorage**
-5. Session is restored on page refresh
+### Roles implemented
 
-### Authorization Flow
+* **EMPLOYEE** – Apply leave, view own leave history
+* **MANAGER** – View and approve team leave requests
+* **HR (Admin)** – Top-level manager role
 
-* JWT is sent in every protected request via:
+### How authorization works
 
-  ```
-  Authorization: Bearer <token>
-  ```
-* Backend middleware verifies:
+```
+Incoming request
+        ↓
+JWT verification
+        ↓
+Extract user role
+        ↓
+Check role permission
+        ↓
+Allow or block request
+```
 
-  * Token validity
-  * Token expiry
-  * User role
+This ensures that even if the UI is bypassed, the backend remains secure.
 
 ---
 
-## 👥 Role-Based Access Control (RBAC)
+## Separation of Users and Employees
 
-### Roles
+### Design decision
 
-* **EMPLOYEE** – Basic user (future: apply leave, view payslips)
-* **MANAGER** – Approval authority (future: approve/reject leave)
-* **HR** – Admin role (system & payroll management)
+* **Users** represent login identities
+* **Employees** represent organizational entities
 
-Roles are stored in a normalized `roles` table and linked to users via foreign keys.
+### Why this matters
 
----
+* Authentication logic stays isolated
+* Organization hierarchy becomes clean
+* Payroll and HR features can be added later
 
-## 🗄️ Database Schema (Current)
-
-### `roles` table
-
-| Column | Type        | Description             |
-| ------ | ----------- | ----------------------- |
-| id     | SERIAL (PK) | Role ID                 |
-| name   | VARCHAR     | EMPLOYEE / MANAGER / HR |
-
-### `users` table
-
-| Column        | Type             | Description            |
-| ------------- | ---------------- | ---------------------- |
-| id            | SERIAL (PK)      | User ID                |
-| email         | VARCHAR (UNIQUE) | Login email            |
-| password_hash | TEXT             | bcrypt hashed password |
-| role_id       | INT (FK)         | Reference to roles     |
-| created_at    | TIMESTAMP        | Account creation time  |
+This separation avoids tight coupling and improves scalability.
 
 ---
 
-## 🔑 Backend APIs (Implemented)
+## Organization Hierarchy
 
-### Login
+### What was implemented
+
+* Each employee is assigned **one fixed manager**
+* One manager can have **multiple employees**
+
+### Hierarchy model
 
 ```
-POST /api/auth/login
+Manager
+ ├── Employee A
+ ├── Employee B
+ └── Employee C
 ```
 
-**Request Body**
-
-```json
-{
-  "email": "admin@company.com",
-  "password": "admin123"
-}
-```
-
-**Response**
-
-```json
-{
-  "token": "<jwt_token>",
-  "role": "HR"
-}
-```
+Employees do not choose approvers; the backend resolves the manager automatically.
 
 ---
 
-### Protected Test Route
+## Leave Management Module (Completed)
 
-```
-GET /api/auth/protected
-```
-
-**Headers**
-
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Response**
-
-```json
-{
-  "message": "Protected route accessed",
-  "user": {
-    "userId": 1,
-    "role": "HR"
-  }
-}
-```
+The leave module is the **core business functionality implemented so far**.
 
 ---
 
-## 🧪 Security Verification
+### Overall Leave Workflow
 
-The following scenarios were tested and verified:
-
-* ✅ Valid token → access granted
-* ❌ No token → 401 Unauthorized
-* ❌ Invalid / expired token → 401 Unauthorized
-* ❌ Unauthorized role → 403 Forbidden
-
----
-
-
-## 🚧 Upcoming Features (Planned)
-
-* Leave Management Module
-
-  * Apply leave (Employee)
-  * Approve / Reject leave (Manager)
-* Payroll Processing Module
-* Role-based API protection for business modules
-* AI/NLP-based leave reason analysis (optional)
-* Documentation & deployment
-
----
-
-## 🧠 Design Decisions (Why This Approach)
-
-* **JWT over sessions** → stateless, scalable
-* **bcrypt** → secure password storage
-* **Normalized roles table** → flexible RBAC
-* **AuthContext** → clean frontend state management
-* **Secure-first approach** → foundation before features
-
----
-
-## 📌 Current Status Summary
-
-✔ Authentication complete
-✔ Authorization complete
-✔ JWT middleware verified
-✔ Session persistence working
-
-➡️ Next step: **Leave Management Module**
-
----
-
-## 🏁 How to Run Locally (Auth Phase)
-
-### Backend
-
-```bash
-npm install
-npm run dev
+```
+Employee applies leave
+        ↓
+Leave status = PENDING
+        ↓
+Manager reviews request
+   ┌─────────────┐
+   ▼             ▼
+APPROVED     REJECTED
 ```
 
-### Frontend
-
-```bash
-npm install
-npm run dev
-```
+All state transitions are enforced at the backend.
 
 ---
 
-> This README will be **updated incrementally** as new modules are added.
+## Apply Leave (Employee)
+
+### How it works
+
+```
+Authenticated employee
+        ↓
+Backend finds employee record
+        ↓
+Manager resolved from hierarchy
+        ↓
+Leave created with status = PENDING
+```
+
+### Key points
+
+* Employee cannot select manager
+* Leave always starts in a neutral state
+* Backend controls workflow
+
+---
+
+## Manager View Leave Requests
+
+### How it works
+
+```
+Authenticated manager
+        ↓
+Resolve manager identity
+        ↓
+Fetch only assigned team leaves
+```
+
+Managers can only see leave requests from their own team.
+
+---
+
+## Approve / Reject Leave
+
+### How it works
+
+```
+Manager action
+        ↓
+Verify leave ownership
+        ↓
+Ensure status = PENDING
+        ↓
+Update status + review timestamp
+```
+
+Invalid actions (re-approval, cross-team access) are blocked.
+
+---
+
+## Employee Leave History
+
+### How it works
+
+```
+Authenticated employee
+        ↓
+Resolve employee identity
+        ↓
+Fetch only own leave records
+```
+
+This provides transparency without exposing others’ data.
+
+---
+
+## Security Measures Implemented
+
+* Secure password hashing
+* JWT verification on all protected APIs
+* Role-based access control
+* Ownership validation before updates
+* Restricted database user permissions
+
+Security is enforced by design, not assumed.
+
+---
+
+## Current Completion Status
+
+* Authentication & Authorization ✅
+* Organization Hierarchy ✅
+* Leave Management Workflow (End-to-End) ✅
+
+This forms a **strong and realistic backend foundation**.
+
+---
+
+## Summary 
+
+> This project demonstrates how to design a secure backend system by completing authentication, authorization, and organizational workflow before adding business features. It implements a full leave management lifecycle with strict backend-enforced rules and real-world hierarchy modeling.
+
+---
+
+> This README documents the work completed so far and will be **extended**, not rewritten, as payroll and other modules are added.
