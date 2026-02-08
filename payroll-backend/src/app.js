@@ -11,3 +11,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 module.exports = app;
+
+const leaveRoutes = require("./routes/leave.routes");
+
+app.use("/api/leaves", leaveRoutes);
+
