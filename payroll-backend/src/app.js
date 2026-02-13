@@ -16,3 +16,6 @@ const leaveRoutes = require("./routes/leave.routes");
 
 app.use("/api/leaves", leaveRoutes);
 
+const payrollRoutes = require("./routes/payroll.routes");
+app.use("/api/payroll", payrollRoutes);
+

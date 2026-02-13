@@ -1,98 +1,97 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/auth/Login";
+import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PayslipDetail from "./pages/employee/PayslipDetail";
+import Login from "./pages/Login";
 
 import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
 import ApplyLeave from "./pages/employee/ApplyLeave";
-import Payslips from "./pages/employee/Payslips";
-
-import ManagerDashboard from "./pages/manager/ManagerDashboard";
+import LeaveHistory from "./pages/employee/LeaveHistory";
 import LeaveRequests from "./pages/manager/LeaveRequests";
+import PayrollManagement from "./pages/hr/PayrollManagement";
 
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import Employees from "./pages/admin/Employees";
-import Payroll from "./pages/admin/Payroll";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+// import ManagerDashboard from "./pages/manager/ManagerDashboard";
+// import HRDashboard from "./pages/hr/HRDashboard";
+const ManagerDashboard = () => <h2>Manager Dashboard (Coming Soon)</h2>;
+const HRDashboard = () => <h2>HR Dashboard (Coming Soon)</h2>;
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
+    <Routes>
+      <Route path="/" element={<Login />} />
 
-        {/* Employee */}
-        <Route
-          path="/employee/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-              <EmployeeDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/employee/apply-leave"
-          element={
-            <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-              <ApplyLeave />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/employee/payslips"
-          element={
-            <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-              <Payslips />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/employee"
+        element={
+          <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+            <EmployeeDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Manager */}
-        <Route
-          path="/manager/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["MANAGER"]}>
-              <ManagerDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/manager/leave-requests"
-          element={
-            <ProtectedRoute allowedRoles={["MANAGER"]}>
-              <LeaveRequests />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/manager"
+        element={
+          <ProtectedRoute allowedRoles={["MANAGER"]}>
+            <ManagerDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Admin */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["HR"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/employees"
-          element={
-            <ProtectedRoute allowedRoles={["HR"]}>
-              <Employees />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/payroll"
-          element={
-            <ProtectedRoute allowedRoles={["HR"]}>
-              <Payroll />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
-  );
+      <Route
+        path="/hr"
+        element={
+          <ProtectedRoute allowedRoles={["HR"]}>
+            <HRDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+  path="/employee/payslip/:id"
+  element={
+    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+      <PayslipDetail />
+    </ProtectedRoute>
+  }
+/> <Route
+  path="/employee/apply-leave"
+  element={
+    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+      <ApplyLeave />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/employee/leaves"
+  element={
+    <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+      <LeaveHistory />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/manager/leaves"
+  element={
+    <ProtectedRoute allowedRoles={["MANAGER"]}>
+      <LeaveRequests />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/hr/payroll"
+  element={
+    <ProtectedRoute allowedRoles={["HR"]}>
+      <PayrollManagement />
+    </ProtectedRoute>
+  }
+/>
+
+</Routes>
+);
 }
 
 export default App;

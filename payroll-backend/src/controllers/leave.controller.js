@@ -181,3 +181,33 @@ exports.getMyLeaves = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+exports.getPendingLeaves = async (req, res) => {
+  const userId = req.user.userId;
+
+  // Step 1: get manager employee_id
+  const managerResult = await pool.query(
+    "SELECT id FROM employees WHERE user_id = $1",
+    [userId]
+  );
+
+  const managerEmployeeId = managerResult.rows[0].id;
+
+  // Step 2: fetch pending leaves for that manager
+  const result = await pool.query(
+    `
+    SELECT l.id, l.leave_type, l.start_date, l.end_date,
+           u.email AS employee_email
+    FROM leaves l
+    JOIN employees e ON l.employee_id = e.id
+    JOIN users u ON e.user_id = u.id
+    WHERE l.status = 'PENDING'
+    AND e.manager_id = $1
+    ORDER BY l.applied_at DESC
+    `,
+    [managerEmployeeId]
+  );
+
+  res.json(result.rows);
+};
