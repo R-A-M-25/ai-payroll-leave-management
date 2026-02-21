@@ -1,3 +1,5 @@
+console.log("Server file loaded");
+
 require("dotenv").config();
 
 const app = require("./app");

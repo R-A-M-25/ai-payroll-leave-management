@@ -37,3 +37,11 @@ router.get(
   allowRoles("EMPLOYEE"),
   leaveController.getMyLeaves
 );
+
+// Employee views leave balance
+router.get(
+  "/balance",
+  verifyToken,
+  allowRoles("EMPLOYEE"),
+  leaveController.getLeaveBalance
+);

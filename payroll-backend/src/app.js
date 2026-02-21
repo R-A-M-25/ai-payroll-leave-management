@@ -2,20 +2,20 @@ const express = require("express");
 const cors = require("cors");
 
 const authRoutes = require("./routes/auth.routes");
+const employeeRoutes = require("./routes/employee.routes");
+const leaveRoutes = require("./routes/leave.routes");
+const payrollRoutes = require("./routes/payroll.routes");
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+// Routes
 app.use("/api/auth", authRoutes);
-
-module.exports = app;
-
-const leaveRoutes = require("./routes/leave.routes");
-
+app.use("/api/employee", employeeRoutes);
 app.use("/api/leaves", leaveRoutes);
-
-const payrollRoutes = require("./routes/payroll.routes");
 app.use("/api/payroll", payrollRoutes);
 
+module.exports = app;

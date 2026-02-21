@@ -12,13 +12,20 @@ exports.login = async (req, res) => {
     }
 
     // 2. Find user
-    const userResult = await pool.query(
-      `SELECT users.id, users.email, users.password_hash, roles.name AS role
-       FROM users
-       JOIN roles ON users.role_id = roles.id
-       WHERE users.email = $1`,
-      [email]
-    );
+   const userResult = await pool.query(
+  `SELECT 
+      users.id,
+      users.name,
+      users.email,
+      users.department,
+      users.doj,
+      users.password_hash,
+      roles.name AS role
+   FROM users
+   JOIN roles ON users.role_id = roles.id
+   WHERE users.email = $1`,
+  [email]
+);
 
     if (userResult.rows.length === 0) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -42,9 +49,17 @@ exports.login = async (req, res) => {
 
     // 5. Respond
     res.json({
-      token,
-      role: user.role,
-    });
+  token,
+  role: user.role,
+  user: {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    department: user.department,
+    doj: user.doj,
+    role: user.role
+  }
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
