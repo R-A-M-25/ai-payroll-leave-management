@@ -495,3 +495,264 @@ This ensures employees clearly understand how their salary was calculated.
 - Payslips immutable and transparent
 
 The payroll backend is **stable, correct, and production-ready for this scope**.
+
+
+🏗 Architecture Overview
+🔹 Backend
+
+Node.js
+
+Express.js
+
+PostgreSQL
+
+JWT Authentication
+
+Role-based Authorization Middleware
+
+Normalized relational database schema
+
+🔹 Frontend
+
+React (Vite)
+
+Tailwind CSS (Industry-style UI)
+
+Axios for API communication
+
+Role-driven navigation
+
+Dynamic filtering & analytics
+
+🔐 Authentication & Authorization
+Implemented Features
+
+Secure JWT-based login
+
+Password hashing using bcrypt
+
+Role-based route protection
+
+Backend middleware:
+
+verifyToken
+
+allowRoles()
+
+JWT Payload
+{
+  "userId": 2,
+  "role": "EMPLOYEE"
+}
+
+Authentication is stateless and validated on every protected route.
+
+🗄 Database Design (Normalized Schema)
+
+The system separates identity from HR data.
+
+Tables
+users
+
+id
+
+name
+
+email
+
+password_hash
+
+role_id
+
+employees
+
+id
+
+user_id (FK → users.id)
+
+manager_id (self-reference)
+
+department
+
+designation
+
+leaves
+
+employee_id (FK → employees.id)
+
+manager_id
+
+leave_type (CL / SL / LOP)
+
+status (PENDING / APPROVED / REJECTED)
+
+reason
+
+start_date
+
+end_date
+
+applied_at
+
+reviewed_at
+
+payslips
+payroll_runs
+employee_salary
+
+This structure supports scalable payroll expansion.
+
+🏢 Role-Based Feature Matrix
+Feature	Employee	Manager	HR
+Apply Leave	✅	❌	❌
+View Leave History	✅	❌	❌
+Approve/Reject Leave	❌	✅	✅
+View Payroll	✅	❌	✅
+Run Payroll	❌	❌	✅
+🧠 Leave Management – Business Logic
+
+This is the core logic implemented today.
+
+Leave Quota Policy
+
+CL = 12 days per year
+
+SL = 8 days per year
+
+LOP = Unlimited
+
+Balance Calculation
+
+Balance is calculated dynamically using:
+
+SUM(end_date - start_date + 1)
+
+Balance considers:
+
+status IN ('APPROVED', 'PENDING')
+
+This prevents overbooking.
+
+Enforcement Rules
+
+Cannot apply leave in the past
+
+End date cannot be before start date
+
+Leave overlap prevention
+
+Leave quota enforcement
+
+LOP allowed when quota exhausted
+
+Backend-level enforcement (cannot bypass via API)
+
+🔄 Leave Flow
+Employee Applies
+
+Form validation (frontend)
+
+Token verification (backend)
+
+Employee lookup
+
+Overlap check
+
+Quota check
+
+Insert leave request
+
+Manager assigned automatically
+
+Manager Reviews
+
+Only manager assigned to employee can view leave
+
+Can approve or reject
+
+Cannot re-process processed leave
+
+reviewed_at timestamp updated
+
+📊 Employee Dashboard Enhancements
+
+Implemented:
+
+KPI Cards
+
+Leave Balance Display
+
+Apply Leave form with:
+
+Disabled options when quota exhausted
+
+Auto date validation
+
+Live leave day calculation
+
+Leave History:
+
+Global search
+
+Status filter
+
+Leave type filter
+
+Date range filter
+
+Manager visibility
+
+Reviewed date column
+
+Status color badges
+
+🛡 Security Measures
+
+JWT required for all protected routes
+
+Role-based route restrictions
+
+Backend validation for business logic
+
+Overlap detection at database level
+
+Prevents quota manipulation via API tools
+
+🧩 Design Decisions (Interview Talking Points)
+Why separate users and employees?
+
+To separate authentication from HR metadata.
+This makes the system scalable and enterprise-ready.
+
+Why calculate leave balance dynamically instead of storing it?
+
+To avoid synchronization bugs and ensure data consistency.
+
+Why count PENDING leaves in quota?
+
+To prevent leave overbooking and misuse of the approval workflow.
+
+Why enforce validation in backend if frontend already validates?
+
+Frontend validation improves UX.
+Backend validation ensures security and integrity.
+
+📈 Current System Status
+
+The system now supports:
+
+Secure authentication
+
+Role-based access
+
+Enterprise-grade leave workflow
+
+Dynamic leave quota system
+
+Overlap prevention
+
+Clean professional UI
+
+Backend enforcement of business rules
+
+This is no longer CRUD — it is business-rule-driven application logic.
