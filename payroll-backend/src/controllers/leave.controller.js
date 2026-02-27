@@ -399,3 +399,48 @@ exports.getLeaveBalance = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.getMyTeam = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Get manager employee record
+    const managerResult = await pool.query(
+      "SELECT id FROM employees WHERE user_id = $1",
+      [userId]
+    );
+
+    if (managerResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Manager not found"
+      });
+    }
+
+    const managerId = managerResult.rows[0].id;
+
+    // Get team members
+    const result = await pool.query(
+      `
+      SELECT 
+        e.id,
+        u.name,
+        u.email,
+        e.department,
+        e.doj
+      FROM employees e
+      JOIN users u ON e.user_id = u.id
+      WHERE e.manager_id = $1
+      ORDER BY u.name
+      `,
+      [managerId]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Server error"
+    });
+  }
+};
