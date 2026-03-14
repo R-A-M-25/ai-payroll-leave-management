@@ -2,19 +2,22 @@ const express = require("express");
 const router = express.Router();
 
 const employeeController = require("../controllers/employee.controller");
+const managerController = require("../controllers/manager.controller");
+const hrController = require("../controllers/hr.controller");
 
-const {verifyToken,allowRoles}
-= require("../middleware/auth.middleware");
+const { verifyToken, allowRoles } =
+require("../middleware/auth.middleware");
 
 
-/* Profile */
+/* ===============================
+   EMPLOYEE ROUTES
+================================= */
 
 router.get(
 "/profile",
 verifyToken,
 employeeController.getProfile
 );
-
 
 router.put(
 "/profile",
@@ -23,30 +26,35 @@ employeeController.updateProfile
 );
 
 
-/* Manager Team ⭐ */
+/* ===============================
+   MANAGER ROUTES
+================================= */
 
 router.get(
 "/team",
 verifyToken,
 allowRoles("MANAGER"),
-employeeController.getTeam
+managerController.getTeam
 );
 
-/* HR / Admin Routes ⭐ */
+
+/* ===============================
+   HR ROUTES
+================================= */
 
 router.get(
 "/all",
 verifyToken,
 allowRoles("HR"),
-employeeController.getAllEmployees
+hrController.getAllEmployees
 );
 
 router.post(
 "/create",
 verifyToken,
 allowRoles("HR"),
-employeeController.createEmployee
+hrController.createEmployee
 );
 
 
-module.exports=router;
+module.exports = router;
