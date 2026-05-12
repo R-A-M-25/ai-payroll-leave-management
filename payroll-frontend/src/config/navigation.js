@@ -1,7 +1,7 @@
 export const navigationConfig = {
   HR: [
     { name: "Dashboard", path: "/hr" },
-    { name: "Payroll", path: "/hr/payroll" },
+    { name: "Payroll", path: "/hr/payroll-management" },
     { name: "Employees", path: "/hr/employees" }
   ],
   MANAGER: [

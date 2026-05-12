@@ -27,11 +27,13 @@ exports.getTeam = async (req, res) => {
     const result = await pool.query(
       `
       SELECT 
+        e.id,
         u.name,
         u.email,
         e.department,
         e.designation,
-        e.created_at
+        e.created_at,
+        u.doj
       FROM employees e
       JOIN users u
       ON e.user_id = u.id

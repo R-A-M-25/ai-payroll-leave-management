@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Users, CalendarClock, ArrowRight, UserCircle, CheckCircle } from "lucide-react";
@@ -23,8 +23,8 @@ export default function ManagerOverview() {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
       const [teamRes, leaveRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/employee/team", config).catch(() => ({ data: [] })),
-        axios.get("http://localhost:5000/api/leaves/manager", config).catch(() => ({ data: [] }))
+        api.get("/employee/team").catch(() => ({ data: [] })),
+        api.get("/leaves/manager").catch(() => ({ data: [] }))
       ]);
 
       setTeam(teamRes.data || []);
@@ -224,10 +224,10 @@ export default function ManagerOverview() {
                 {team.slice(0, 5).map((emp, index) => (
                   <div key={index} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-100 to-blue-200 flex items-center justify-center text-indigo-700 shrink-0 font-black shadow-sm group-hover:scale-110 transition-transform">
-                      {emp.name.charAt(0).toUpperCase()}
+                      {(emp.name || emp.email || "?").charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-extrabold text-slate-800 truncate group-hover:text-indigo-600 transition-colors">{emp.name}</p>
+                      <p className="font-extrabold text-slate-800 truncate group-hover:text-indigo-600 transition-colors">{emp.name || "Unassigned"}</p>
                       <p className="text-xs font-semibold text-slate-400 truncate mt-0.5">{emp.email}</p>
                     </div>
                     <div className="text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded-md uppercase tracking-wider shrink-0">

@@ -13,10 +13,11 @@ exports.getAllEmployees = async (req, res) => {
     const result = await pool.query(
       `
       SELECT 
-        u.id,
+        e.id,
+        u.id AS user_id,
         u.name,
         u.email,
-        r.role_name,
+        r.name AS role_name,
         e.department,
         e.designation,
         e.base_salary,
@@ -59,15 +60,15 @@ exports.createEmployee = async (req, res) => {
 
     const body = req.body || {};
 
-const {
-  name,
-  email,
-  department,
-  designation,
-  base_salary,
-  manager_id
-} = body;
-
+    const {
+      name,
+      email,
+      department,
+      designation,
+      base_salary,
+      role = 'EMPLOYEE', // EMPLOYEE or MANAGER
+      manager_id
+    } = body;
 
     /* Validate required fields */
 
@@ -76,6 +77,11 @@ const {
         message: "Missing required fields"
       });
     }
+
+    // Determine role_id based on role string
+    // Assuming 1 = EMPLOYEE, 2 = MANAGER, 3 = HR
+    const roleId = role.toUpperCase() === 'MANAGER' ? 2 : 1;
+
 
 
     await client.query("BEGIN");
@@ -93,10 +99,10 @@ const {
     const userRes = await client.query(
       `
       INSERT INTO users (name, email, password_hash, role_id)
-      VALUES ($1,$2,$3,2)
+      VALUES ($1,$2,$3,$4)
       RETURNING id
       `,
-      [name, email, password_hash]
+      [name, email, password_hash, roleId]
     );
 
     const userId = userRes.rows[0].id;
@@ -113,9 +119,9 @@ const {
       `,
       [
         userId,
-        manager_id ? Number(manager_id) : null,
+        (roleId === 1 && manager_id) ? Number(manager_id) : null,
         department,
-        designation || "Employee",
+        designation || (roleId === 2 ? "Manager" : "Employee"),
         base_salary || 0
       ]
     );
@@ -168,3 +174,177 @@ const {
   }
 
 };
+
+
+/* ===============================
+   HR: UPDATE EMPLOYEE
+================================= */
+
+exports.updateEmployee = async (req, res) => {
+
+  try {
+
+    const employeeId = req.params.id;
+
+    const {
+      department,
+      designation,
+      base_salary,
+      manager_id
+    } = req.body;
+
+    // Convert empty string to null to support 'No Manager' removal
+    const parsedManagerId = manager_id === "" ? null : manager_id;
+    // IF manager_id wasn't provided at all (undefined), we don't want to overwrite with null.
+    // But our frontend always sends all fields. We'll handle both.
+    const isManagerIdProvided = manager_id !== undefined;
+
+    const result = await pool.query(
+      `
+      UPDATE employees
+      SET 
+        department = COALESCE($1, department),
+        designation = COALESCE($2, designation),
+        base_salary = COALESCE($3, base_salary),
+        manager_id = CASE WHEN $6::boolean THEN $4::int ELSE manager_id END
+      WHERE id = $5
+      RETURNING *
+      `,
+      [
+        department,
+        designation,
+        base_salary,
+        parsedManagerId,
+        employeeId,
+        isManagerIdProvided
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Employee not found"
+      });
+    }
+
+    res.json({
+      message: "Employee updated successfully",
+      employee: result.rows[0]
+    });
+
+  } catch (err) {
+
+    console.error("UPDATE EMPLOYEE ERROR:", err);
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+};
+
+
+/* ===============================
+   HR: DEACTIVATE EMPLOYEE
+================================= */
+
+exports.deactivateEmployee = async (req, res) => {
+
+  try {
+
+    const employeeId = req.params.id;
+
+    const result = await pool.query(
+      `
+      UPDATE employees
+      SET status = 'inactive'
+      WHERE id = $1
+      RETURNING *
+      `,
+      [employeeId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Employee not found"
+      });
+    }
+
+    res.json({
+      message: "Employee deactivated successfully"
+    });
+
+  } catch (err) {
+
+    console.error("DEACTIVATE EMPLOYEE ERROR:", err);
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+};
+
+
+/* ===============================
+   HR: GET ALL MANAGERS
+================================= */
+
+exports.getManagers = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        e.id,
+        u.id AS user_id,
+        u.name,
+        u.email,
+        e.department,
+        (SELECT COUNT(*) FROM employees emp WHERE emp.manager_id = e.id) as team_size
+      FROM users u
+      JOIN employees e ON u.id = e.user_id
+      WHERE u.role_id = 2
+      ORDER BY u.name ASC
+      `
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("GET MANAGERS ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+/* ===============================
+   HR: GET EMPLOYEES BY MANAGER
+================================= */
+
+exports.getEmployeesByManager = async (req, res) => {
+  try {
+    const { managerId } = req.params;
+    const result = await pool.query(
+      `
+      SELECT 
+        e.id,
+        u.id AS user_id,
+        u.name,
+        u.email,
+        r.name AS role_name,
+        e.department,
+        e.designation,
+        e.base_salary
+      FROM users u
+      JOIN employees e ON u.id = e.user_id
+      JOIN roles r ON u.role_id = r.id
+      WHERE e.manager_id = $1
+      ORDER BY u.name ASC
+      `,
+      [managerId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("GET EMPLOYEES BY MANAGER ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+};

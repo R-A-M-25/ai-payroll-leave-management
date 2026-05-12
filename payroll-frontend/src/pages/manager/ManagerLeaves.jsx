@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { ClipboardList, CheckCircle, XCircle, Search, Filter } from "lucide-react";
 
@@ -15,12 +15,7 @@ export default function ManagerLeaves() {
 
   const fetchLeaves = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/leaves/manager",
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await api.get("/leaves/manager");
       setLeaves(res.data);
     } catch (err) {
       console.error(err);
@@ -31,13 +26,7 @@ export default function ManagerLeaves() {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/leaves/${id}/status`,
-        { status },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      await api.put(`/leaves/${id}/status`, { status });
       fetchLeaves();
     } catch (err) {
       console.error(err);

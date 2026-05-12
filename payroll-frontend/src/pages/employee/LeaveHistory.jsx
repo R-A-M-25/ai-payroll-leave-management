@@ -174,7 +174,7 @@
 
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { Search, Filter, Calendar, CheckCircle2, XCircle, Clock } from "lucide-react";
 
@@ -196,12 +196,7 @@ export default function LeaveHistory() {
 
   const fetchLeaves = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/leaves/my",
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await api.get("/leaves/my");
       setLeaves(res.data);
     } catch (err) {
       console.error("Error fetching leaves", err);

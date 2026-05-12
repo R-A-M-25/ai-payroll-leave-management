@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { FileText, IndianRupee, FileCheck, Calendar as CalendarIcon } from "lucide-react";
 
@@ -14,12 +14,7 @@ export default function Payslips() {
 
   const fetchPayslips = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/payroll/payslips",
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await api.get("/payroll/payslips");
       setPayslips(res.data);
     } catch (err) {
       console.log("Payslip Error:", err);

@@ -1,87 +1,82 @@
 import { Link } from "react-router-dom";
-import { Users, IndianRupee, Activity, ArrowRight, ShieldCheck } from "lucide-react";
+import { Users, Receipt, Building, Briefcase, Activity, ShieldCheck } from "lucide-react";
 
 export default function AdminDashboard() {
   return (
-    <div className="space-y-8 max-w-7xl mx-auto h-full flex flex-col">
-      {/* Hero Section */}
-      <div className="glass-panel p-10 bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-800 text-white relative overflow-hidden border-none shadow-2xl shadow-purple-500/20">
-        <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full blur-[80px] pointer-events-none"></div>
-        <div className="absolute -left-10 bottom-0 w-60 h-60 bg-indigo-400/20 rounded-full blur-[60px] pointer-events-none"></div>
+    <div className="space-y-8 animate-slide-up">
+      {/* Hero Header */}
+      <div className="glass-panel p-8 md:p-12 bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-800 text-white relative overflow-hidden border-none shadow-2xl shadow-indigo-500/20">
+        <div className="absolute -right-20 -top-20 w-96 h-96 bg-white/10 rounded-full blur-[80px] pointer-events-none"></div>
+        <div className="absolute -left-10 bottom-0 w-64 h-64 bg-cyan-400/20 rounded-full blur-[60px] pointer-events-none"></div>
+
+        <div className="relative z-10 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md mb-6 border border-white/20 text-sm font-bold shadow-sm">
+            <ShieldCheck size={16} className="text-cyan-300" />
+            <span className="text-cyan-50">Authorized HR Workspace</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-sm mb-4 leading-tight">
+            Admin Dashboard
+          </h1>
+          <p className="text-indigo-100 text-lg md:text-xl font-medium leading-relaxed">
+            Centralized control center for your organization's human capital and financial distributions.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
-               <ShieldCheck size={32} className="text-white drop-shadow-md" />
+        {/* Organization Hub Card */}
+        <Link to="/hr/employees" className="group">
+          <div className="glass-panel p-8 h-full bg-white transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 relative overflow-hidden border border-slate-200/50">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 scale-150 transform group-hover:scale-110">
+              <Building size={160} />
             </div>
-            <div>
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-2 drop-shadow-sm">
-                Admin Control Center
-              </h1>
-              <p className="text-purple-100/90 text-lg font-medium max-w-xl">
-                Oversee corporate workforce metrics, payroll execution, and administration logic from a unified hub.
+            
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                <Users size={32} />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-slate-800 mb-3 group-hover:text-indigo-600 transition-colors">
+                Organization Hub
+              </h2>
+              <p className="text-slate-500 leading-relaxed mb-8 flex-grow">
+                Manage your workforce comprehensively. Create new employee accounts, assign leadership roles, update department matrices, and visualize reporting hierarchies.
               </p>
+              
+              <div className="flex items-center gap-2 text-indigo-600 font-bold uppercase text-sm tracking-wider group-hover:gap-4 transition-all w-max bg-indigo-50/50 px-4 py-2 rounded-lg">
+                Manage Workforce <Briefcase size={16} />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up">
-        {/* KPI: Workforce */}
-        <div className="glass-panel p-6 bg-gradient-to-b from-white to-slate-50 border-t-4 border-t-indigo-500 hover:-translate-y-1 transition-transform cursor-default group">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-              <Users size={24} />
+        {/* Payroll Center Card */}
+        <Link to="/hr/payroll-management" className="group">
+          <div className="glass-panel p-8 h-full bg-white transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1 relative overflow-hidden border border-slate-200/50">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 scale-150 transform group-hover:scale-110">
+              <Activity size={160} />
             </div>
-            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-md">+12%</span>
-          </div>
-          <h3 className="text-slate-500 font-semibold mb-1">Total Employees</h3>
-          <div className="text-4xl font-black text-slate-800">45</div>
-        </div>
-
-        {/* KPI: Pending Payroll */}
-        <div className="glass-panel p-6 bg-gradient-to-b from-white to-slate-50 border-t-4 border-t-pink-500 hover:-translate-y-1 transition-transform cursor-default group">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center group-hover:bg-pink-600 group-hover:text-white transition-colors">
-              <IndianRupee size={24} />
+            
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                <Receipt size={32} />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-slate-800 mb-3 group-hover:text-emerald-600 transition-colors">
+                Payroll Center
+              </h2>
+              <p className="text-slate-500 leading-relaxed mb-8 flex-grow">
+                End-to-end salary execution. Assign employee compensations, run automated monthly payroll cycles with LOP deductions, and review historical disbursements.
+              </p>
+              
+              <div className="flex items-center gap-2 text-emerald-600 font-bold uppercase text-sm tracking-wider group-hover:gap-4 transition-all w-max bg-emerald-50/50 px-4 py-2 rounded-lg">
+                Process Payroll <Receipt size={16} />
+              </div>
             </div>
-            <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-md">Pending</span>
           </div>
-          <h3 className="text-slate-500 font-semibold mb-1">Payroll Status</h3>
-          <div className="text-3xl font-black text-slate-800">Awaiting Run</div>
-        </div>
-
-        {/* KPI: System Health */}
-        <div className="glass-panel p-6 bg-gradient-to-b from-white to-slate-50 border-t-4 border-t-teal-500 hover:-translate-y-1 transition-transform cursor-default group">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors">
-              <Activity size={24} />
-            </div>
-            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-md">Optimal</span>
-          </div>
-          <h3 className="text-slate-500 font-semibold mb-1">System Health</h3>
-          <div className="text-4xl font-black text-slate-800">100%</div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-        {/* Quick Link: Employees */}
-        <Link to="/hr/employees" className="glass-panel p-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/10 transition-all group block relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-indigo-100/50 to-transparent"></div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2 flex items-center gap-3">
-             Workforce Management <ArrowRight className="text-indigo-500 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-          </h2>
-          <p className="text-slate-600 font-medium max-w-md">Add new employees to the platform. The system will automatically generate passwords for seamless onboarding.</p>
         </Link>
         
-        {/* Quick Link: Payroll */}
-        <Link to="/hr/payroll" className="glass-panel p-8 bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-100 hover:shadow-xl hover:shadow-pink-500/10 transition-all group block relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-pink-100/50 to-transparent"></div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2 flex items-center gap-3">
-             Execute Payroll <ArrowRight className="text-pink-500 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-          </h2>
-          <p className="text-slate-600 font-medium max-w-md">Run monthly computations. Manage LOP deductions, base salaries, and release bulk slips to employees securely.</p>
-        </Link>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { navigationConfig } from "../../config/navigation";
 import { 
   Menu, LogOut, LayoutDashboard, Calendar, FileText, 
-  User, BarChart2, Users, Receipt
+  User, BarChart2, Users, Receipt, Briefcase, Activity
 } from "lucide-react";
 
 export default function Sidebar({ collapsed, setCollapsed }) {
@@ -29,63 +29,82 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
   return (
     <aside
-      className={`relative z-20 flex flex-col transition-all duration-300 glass border-r-0 rounded-tr-3xl rounded-br-3xl my-4 ml-4 shrink-0 ${
-        collapsed ? "w-24" : "w-72"
+      className={`relative z-20 flex flex-col transition-all duration-300 bg-white border-r border-slate-200/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)] shrink-0 ${
+        collapsed ? "w-20" : "w-72"
       }`}
     >
-      <div className="flex items-center justify-between px-6 py-8">
-        {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <span className="text-white font-bold text-xl">P</span>
+      <div className="flex items-center justify-between px-6 py-8 relative group">
+        {!collapsed ? (
+          <div className="flex items-center gap-3 animate-fade-in">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 overflow-hidden">
+              <div className="absolute inset-0 bg-white/20 hover:bg-white/0 transition-colors pointer-events-none"></div>
+              <Activity className="text-white" size={24} />
             </div>
-            <span className="text-xl font-bold text-slate-800 tracking-tight">
-              Payroll<span className="text-blue-600">Pro</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
+                Payroll<span className="text-indigo-600">Management</span>
+              </span>
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">System</span>
+            </div>
+          </div>
+        ) : (
+          <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 animate-fade-in">
+             <Activity className="text-white" size={24} />
           </div>
         )}
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-all ${collapsed ? 'mx-auto' : ''}`}
+          className={`absolute -right-3 top-10 transform -translate-y-1/2 w-7 h-7 bg-white border border-slate-200 shadow-sm rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 hover:shadow-md transition-all z-30 opacity-0 group-hover:opacity-100 hidden sm:flex`}
         >
-          <Menu size={22} />
+          <Menu size={14} className={collapsed ? "" : "rotate-180 transition-transform"} />
         </button>
       </div>
 
-      <nav className="flex-1 flex flex-col gap-2 px-4 mt-4 overflow-y-auto">
+      <nav className="flex-1 flex flex-col gap-2 px-4 mt-2 overflow-y-auto hide-scrollbar">
+        {!collapsed && <div className="px-4 text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 mt-4">Main Navigation</div>}
+        
         {links.map((link) => (
           <NavLink
             key={link.path}
             to={link.path}
             end
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all group ${
+              `flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all group relative overflow-hidden ${
                 isActive
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                  : "text-slate-600 hover:bg-white/50 hover:text-slate-900"
+                  ? "bg-indigo-50 text-indigo-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] border border-indigo-100/50"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-800 border border-transparent"
               } ${collapsed ? 'justify-center' : ''}`
             }
           >
             {({ isActive }) => (
               <>
-                <div className={`${isActive ? "text-white" : "text-slate-400 group-hover:text-blue-500"}`}>
+                {isActive && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-r-full shadow-[0_0_10px_rgba(79,70,229,0.8)]"></div>
+                )}
+                
+                <div className={`${isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-indigo-500 transition-colors"}`}>
                   {getIcon(link.name)}
                 </div>
-                {!collapsed && <span>{link.name}</span>}
+                
+                {!collapsed && <span className="tracking-wide z-10">{link.name}</span>}
+                
+                {!collapsed && isActive && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-600 opacity-50 relative before:absolute before:inset-0 before:bg-indigo-400 before:animate-ping before:rounded-full"></div>
+                )}
               </>
             )}
           </NavLink>
         ))}
       </nav>
 
-      <div className="p-4 mt-auto">
+      <div className="p-4 mt-auto border-t border-slate-100 bg-slate-50/50">
         <button
           onClick={logout}
-          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all ${collapsed ? 'justify-center' : ''}`}
+          className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all group ${collapsed ? 'justify-center' : ''}`}
         >
-          <LogOut size={20} />
-          {!collapsed && <span>Logout</span>}
+          <LogOut size={20} className="text-slate-400 group-hover:text-rose-500 transition-colors" />
+          {!collapsed && <span className="tracking-wide">Secure Logout</span>}
         </button>
       </div>
     </aside>

@@ -1,177 +1,315 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../../api/api";
-import { PlayCircle, IndianRupee, FileCheck, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { Receipt, PlayCircle, History, UserCheck, Search, Users, Activity } from "lucide-react";
 
-const PayrollManagement = () => {
-  const [month, setMonth] = useState(new Date().getMonth() + 1);
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [message, setMessage] = useState(null);
-  const [history, setHistory] = useState([]);
+export default function PayrollManagement() {
+  const { token } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState("run"); // run | assign | history
   const [loading, setLoading] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  
+  // Assign Salary State
+  const [assignForm, setAssignForm] = useState({
+    employee_id: "",
+    monthly_salary: "",
+    effective_from: ""
+  });
 
-  const fetchPayrollHistory = async () => {
+  // Run Payroll State
+  const [runForm, setRunForm] = useState({
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear()
+  });
+
+  // History State
+  const [payrollHistory, setPayrollHistory] = useState([]);
+
+  useEffect(() => {
+    if (activeTab === "assign") {
+      fetchEmployees();
+    } else if (activeTab === "history") {
+      fetchPayrollHistory();
+    }
+  }, [activeTab]);
+
+  const fetchEmployees = async () => {
     try {
-      const res = await api.get("/payroll/all");
-      setHistory(res.data);
+      const res = await api.get("/employee/all");
+      setEmployees(res.data);
     } catch (err) {
-      console.error("Failed to fetch payroll history", err);
+      console.error(err);
     }
   };
 
-  useEffect(() => {
-    fetchPayrollHistory();
-  }, []);
-
-  const runPayroll = async (e) => {
-    e.preventDefault();
-    setMessage(null);
+  const fetchPayrollHistory = async () => {
     setLoading(true);
-
     try {
-      const res = await api.post("/payroll/run", {
-        month: Number(month),
-        year: Number(year),
-      });
-
-      setMessage({ type: "success", text: res.data.message });
-      fetchPayrollHistory();
+      const res = await api.get("/payroll/history");
+      setPayrollHistory(res.data);
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.message || "Payroll failed" });
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleAssignSalary = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.post("/payroll/salary", assignForm);
+      alert(res.data.message);
+      setAssignForm({ employee_id: "", monthly_salary: "", effective_from: "" });
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Error assigning salary");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRunPayroll = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.post("/payroll/run", runForm);
+      alert(res.data.message);
+      setActiveTab("history"); // move to history to show it
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Error running payroll");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getMonthName = (monthNumber) => {
+    const date = new Date();
+    date.setMonth(monthNumber - 1);
+    return date.toLocaleString('default', { month: 'long' });
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="glass-panel p-8 bg-gradient-to-br from-emerald-600/90 to-teal-700/90 text-white relative overflow-hidden border-none shadow-xl shadow-emerald-500/20">
-        <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="space-y-6 animate-slide-up">
+      {/* Hero Section */}
+      <div className="glass-panel p-8 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 text-white relative overflow-hidden border-none shadow-2xl shadow-emerald-500/20">
+        <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full blur-[80px] pointer-events-none"></div>
+        <div className="absolute -left-10 bottom-0 w-60 h-60 bg-yellow-400/20 rounded-full blur-[60px] pointer-events-none"></div>
         
-        <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-            Payroll Management
-          </h1>
-          <p className="text-emerald-100 max-w-2xl text-lg opacity-90">
-            Execute the monthly payroll cycle and review historical payroll records for all employees across the organization.
-          </p>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-sm flex items-center gap-4">
+              <Receipt size={40} className="text-emerald-100" />
+              Payroll Center
+            </h1>
+            <p className="mt-2 text-emerald-50 max-w-xl text-lg font-medium">
+              Assign compensation, automate salary generation, and review all previous payroll execution cycles.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Run Payroll Form */}
-        <div className="glass-panel p-6 lg:col-span-1 h-fit">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-              <PlayCircle size={20} />
-            </div>
-            <h2 className="text-xl font-bold text-slate-800">Execute Payroll</h2>
-          </div>
+      {/* Tabs Layout */}
+      <div className="flex items-center border-b border-slate-200 mb-6 px-1">
+        <button
+          onClick={() => setActiveTab("run")}
+          className={`flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2 ${activeTab === "run" ? "border-emerald-600 text-emerald-700" : "border-transparent text-slate-500 hover:text-slate-800"}`}
+        >
+          <PlayCircle size={18} />
+          Execute Payroll
+        </button>
+        <button
+          onClick={() => setActiveTab("assign")}
+          className={`flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2 ${activeTab === "assign" ? "border-emerald-600 text-emerald-700" : "border-transparent text-slate-500 hover:text-slate-800"}`}
+        >
+          <UserCheck size={18} />
+          Assign Salary
+        </button>
+        <button
+          onClick={() => setActiveTab("history")}
+          className={`flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2 ${activeTab === "history" ? "border-emerald-600 text-emerald-700" : "border-transparent text-slate-500 hover:text-slate-800"}`}
+        >
+          <History size={18} />
+          Payroll History
+        </button>
+      </div>
 
-          {message && (
-            <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 text-sm font-medium border ${
-              message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
-            }`}>
-              {message.type === 'success' ? <FileCheck size={18} className="shrink-0 mt-0.5" /> : <AlertCircle size={18} className="shrink-0 mt-0.5" />}
-              <p>{message.text}</p>
+      {/* Conditional Content */}
+      <div className="glass-panel relative overflow-hidden bg-white animate-slide-up">
+        {activeTab === "run" && (
+          <div className="p-8 max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <Activity size={32} />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800">Run Monthly Payroll</h2>
+              <p className="text-slate-500 mt-2">Generate payslips for all active employees and apply LOP deductions automatically.</p>
             </div>
-          )}
 
-          <form onSubmit={runPayroll} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Target Month</label>
-              <select 
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-slate-700"
-                required
+            <form onSubmit={handleRunPayroll} className="space-y-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Target Month</label>
+                  <select 
+                    value={runForm.month} 
+                    onChange={(e) => setRunForm({...runForm, month: parseInt(e.target.value)})}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                      <option key={m} value={m}>{getMonthName(m)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Target Year</label>
+                  <input 
+                    type="number" 
+                    value={runForm.year} 
+                    onChange={(e) => setRunForm({...runForm, year: parseInt(e.target.value)})}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95 flex justify-center items-center gap-2 disabled:opacity-70 disabled:active:scale-100"
               >
-                {[...Array(12)].map((_, i) => (
-                  <option key={i+1} value={i+1}>{new Date(0, i).toLocaleString('en-US', { month: 'long' })}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Target Year</label>
-              <input
-                type="number"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-slate-700"
-                required
-                min="2020"
-                max={new Date().getFullYear() + 1}
-              />
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full bg-blue-600 text-white rounded-xl py-3.5 font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:shadow-blue-500/40 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <>Execute Run <PlayCircle size={18} /></>
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* History Table */}
-        <div className="glass-panel p-0 lg:col-span-2 overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <IndianRupee size={20} className="text-emerald-500" /> Payroll History
-            </h2>
-            <div className="text-sm text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-lg">
-              {history.length} Records
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-slate-50 text-slate-500 font-semibold uppercase text-xs tracking-wider">
-                <tr>
-                  <th className="px-6 py-4">Employee ID</th>
-                  <th className="px-6 py-4">Period</th>
-                  <th className="px-6 py-4">Base Salary</th>
-                  <th className="px-6 py-4">LOP Info</th>
-                  <th className="px-6 py-4">Deduction</th>
-                  <th className="px-6 py-4 text-right">Net Payout</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {history.length > 0 ? history.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900">EMP-{p.employee_id}</td>
-                    <td className="px-6 py-4 font-medium">{new Date(0, p.month - 1).toLocaleString('en-US', { month: 'short' })} {p.year}</td>
-                    <td className="px-6 py-4">₹{p.base_salary?.toLocaleString()}</td>
-                    <td className="px-6 py-4">
-                      {p.lop_days > 0 ? (
-                        <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-md text-xs font-bold">{p.lop_days} Days</span>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-red-600 font-medium">₹{p.lop_deduction?.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right font-bold text-emerald-600">₹{p.net_salary?.toLocaleString()}</td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
-                      <FileCheck size={32} className="mx-auto mb-3 opacity-20" />
-                      No payroll history records found.
-                    </td>
-                  </tr>
+                {loading ? (
+                   <div className="w-6 h-6 border-2 border-white border-t-transparent flex items-center justify-center rounded-full animate-spin"></div>
+                ) : (
+                  <><PlayCircle size={22} /> Execute Payroll Cycle</>
                 )}
-              </tbody>
-            </table>
+              </button>
+            </form>
           </div>
-        </div>
+        )}
+
+        {activeTab === "assign" && (
+          <div className="p-8 max-w-2xl mx-auto">
+             <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <UserCheck size={32} />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800">Assign Compensation</h2>
+              <p className="text-slate-500 mt-2">Update an employee's base salary ensuring it takes effect from the specified date forward.</p>
+            </div>
+
+            <form onSubmit={handleAssignSalary} className="space-y-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+               <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Select Employee</label>
+                  <select 
+                    required
+                    value={assignForm.employee_id} 
+                    onChange={(e) => setAssignForm({...assignForm, employee_id: e.target.value})}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all cursor-pointer"
+                  >
+                    <option value="">-- Select Member --</option>
+                    {employees.map(emp => (
+                      <option key={emp.id} value={emp.id}>{emp.name} ({emp.department} • {emp.role_name})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Monthly Salary</label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                      <input 
+                        type="number" 
+                        required
+                        placeholder="e.g. 7500"
+                        value={assignForm.monthly_salary} 
+                        onChange={(e) => setAssignForm({...assignForm, monthly_salary: e.target.value})}
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Effective From</label>
+                    <input 
+                      type="date" 
+                      required
+                      value={assignForm.effective_from} 
+                      onChange={(e) => setAssignForm({...assignForm, effective_from: e.target.value})}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-lg shadow-teal-200 transition-all active:scale-95 disabled:opacity-70 disabled:active:scale-100"
+                >
+                  {loading ? 'Assigning...' : 'Assign Compensation Package'}
+                </button>
+            </form>
+          </div>
+        )}
+
+        {activeTab === "history" && (
+           <div className="overflow-x-auto">
+             {loading ? (
+                <div className="p-16 flex justify-center items-center">
+                  <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+             ) : (
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/50 text-slate-500 border-b border-slate-200">
+                      <th className="p-5 font-bold text-sm uppercase tracking-wider">Cycle Period</th>
+                      <th className="p-5 font-bold text-sm uppercase tracking-wider">Status</th>
+                      <th className="p-5 font-bold text-sm uppercase tracking-wider text-right">Target Audience</th>
+                      <th className="p-5 font-bold text-sm uppercase tracking-wider text-right">Total Disbursed</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {payrollHistory.map(run => (
+                      <tr key={run.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-5">
+                          <div className="font-bold text-slate-800 text-lg">{getMonthName(run.month)} {run.year}</div>
+                          <div className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-bold">Run ID: #{run.id}</div>
+                        </td>
+                        <td className="p-5">
+                          {run.status === "COMPLETED" ? (
+                            <span className="px-3 py-1 bg-emerald-100 text-emerald-700 font-bold rounded-full text-xs uppercase tracking-wide">
+                              {run.status}
+                            </span>
+                          ) : (
+                             <span className="px-3 py-1 bg-amber-100 text-amber-700 font-bold rounded-full text-xs uppercase tracking-wide">
+                              {run.status}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-5 text-right font-bold text-slate-700">
+                          {run.total_employees} Personnel
+                        </td>
+                        <td className="p-5 text-right font-black text-emerald-600 text-lg">
+                          {formatCurrency(run.total_disbursed)}
+                        </td>
+                      </tr>
+                    ))}
+                    {payrollHistory.length === 0 && (
+                      <tr>
+                        <td colSpan="4" className="p-12 text-center text-slate-500 font-medium">No payroll history found. Execute a payroll run to populate this view.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+             )}
+           </div>
+        )}
+
       </div>
     </div>
   );
-};
-
-export default PayrollManagement;
+}

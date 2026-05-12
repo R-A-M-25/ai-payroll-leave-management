@@ -28,4 +28,12 @@ router.get(
   payrollController.getMyPayslips
 );
 
+// HR views all payroll runs
+router.get(
+  "/history",
+  verifyToken,
+  allowRoles("HR"),
+  payrollController.getAllPayrollRuns
+);
+
 module.exports = router;

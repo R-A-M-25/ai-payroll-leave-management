@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { Users, Mail, Briefcase, Calendar as CalendarIcon, MapPin, Phone } from "lucide-react";
 
@@ -14,12 +14,7 @@ export default function TeamMembers() {
 
   const fetchMembers = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/employee/team",
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await api.get("/employee/team");
       setMembers(res.data);
     } catch (err) {
       console.error(err);
@@ -95,10 +90,10 @@ export default function TeamMembers() {
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-md group-hover:scale-110 transition-transform">
-                           {m.name.charAt(0).toUpperCase()}
+                           {(m.name || m.email || "?").charAt(0).toUpperCase()}
                         </div>
                         <div className="flex flex-col">
-                           <span className="font-bold text-slate-800 text-base">{m.name}</span>
+                           <span className="font-bold text-slate-800 text-base">{m.name || "Unassigned Name"}</span>
                            <span className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
                               <Mail size={12} /> {m.email}
                            </span>

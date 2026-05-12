@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { CalendarRange, Info, CheckCircle2, AlertCircle, Send } from "lucide-react";
 
@@ -28,17 +28,12 @@ export default function ApplyLeave() {
 
   const fetchBalance = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/leaves/balance",
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await api.get("/leaves/balance");
 
-      setBalance(res.data.balance);
+      setBalance(res.data);
 
       // Auto-switch to LOP if CL and SL exhausted
-      if (res.data.balance.CL <= 0 && res.data.balance.SL <= 0) {
+      if (res.data.CL <= 0 && res.data.SL <= 0) {
         setFormData((prev) => ({
           ...prev,
           leave_type: "LOP"
@@ -88,13 +83,7 @@ export default function ApplyLeave() {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        "http://localhost:5000/api/leaves/apply",
-        formData,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await api.post("/leaves/apply", formData);
 
       setSuccess(res.data.message);
 

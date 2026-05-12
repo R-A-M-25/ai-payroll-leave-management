@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import {
   AreaChart,
@@ -30,14 +30,7 @@ export default function EmployeeAnalytics() {
 
   const fetchLeaves = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/leaves/my",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const res = await api.get("/leaves/my");
       setLeaves(res.data);
     } catch (err) {
       console.log(err);
@@ -95,47 +88,59 @@ export default function EmployeeAnalytics() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in relative">
+      
+      {/* Premium Ambient Background Glows */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-[-1]">
+        <div className="absolute top-[20%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px] animate-float"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-fuchsia-500/10 rounded-full blur-[120px] animate-float-reverse delay-300"></div>
+      </div>
+
       {/* Hero Section */}
-      <div className="glass-panel p-8 bg-gradient-to-br from-indigo-700 via-purple-700 to-fuchsia-800 text-white relative overflow-hidden border-none shadow-2xl shadow-purple-500/20">
-        <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full blur-[80px] pointer-events-none"></div>
-        <div className="absolute -left-10 bottom-0 w-60 h-60 bg-blue-400/20 rounded-full blur-[60px] pointer-events-none"></div>
+      <div className="glass-panel p-10 bg-gradient-to-br from-indigo-950 via-purple-900 to-fuchsia-950 text-white relative overflow-hidden border border-white/10 shadow-[0_20px_40px_-15px_rgba(88,28,135,0.5)] rounded-3xl animate-slide-up">
+        {/* Dynamic Inner Glows */}
+        <div className="absolute -right-20 -top-20 w-80 h-80 bg-fuchsia-400/20 rounded-full blur-[80px] pointer-events-none animate-float"></div>
+        <div className="absolute -left-10 bottom-0 w-60 h-60 bg-blue-400/20 rounded-full blur-[60px] pointer-events-none animate-float-reverse delay-500"></div>
         
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md mb-6 border border-white/10 shadow-inner">
+               <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+               <p className="text-white font-bold tracking-widest text-xs uppercase">Telemetry Center</p>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-100 to-fuchsia-200">
               Analytics Overview
             </h1>
-            <p className="mt-2 text-purple-100 max-w-xl text-lg font-medium">
-              A comprehensive deep-dive into your historical leave consumption metrics.
+            <p className="mt-4 text-purple-100/90 max-w-2xl text-lg font-medium leading-relaxed drop-shadow">
+              A comprehensive deep-dive into your historical leave consumption metrics and workforce availability.
             </p>
           </div>
           
-          <div className="bg-white/10 backdrop-blur-md p-1.5 rounded-xl border border-white/20 shadow-inner">
+          <div className="bg-white/10 backdrop-blur-3xl p-2 rounded-xl border border-white/20 shadow-[inset_0_2px_15px_rgba(255,255,255,0.1)] group hover:bg-white/20 transition-all duration-300">
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="bg-transparent text-white font-bold text-lg py-2 px-6 focus:outline-none rounded-lg appearance-none cursor-pointer"
+              className="bg-transparent text-white font-black tracking-wider text-xl py-3 px-8 focus:outline-none rounded-lg appearance-none cursor-pointer text-center w-full min-w-[140px]"
             >
-              <option value="2024" className="text-slate-800">2024</option>
-              <option value="2025" className="text-slate-800">2025</option>
-              <option value="2026" className="text-slate-800">2026</option>
+              <option value="2024" className="text-slate-800 font-bold">2024</option>
+              <option value="2025" className="text-slate-800 font-bold">2025</option>
+              <option value="2026" className="text-slate-800 font-bold">2026</option>
             </select>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Monthly Chart (Area Chart) */}
-        <div className="glass-panel p-8 animate-slide-up bg-white">
-          <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-sm">
-                <BarChart3 size={24} />
+        <div className="glass-panel p-10 animate-slide-up delay-200 bg-white/60 backdrop-blur-3xl border-white/60 shadow-xl shadow-slate-200/40 rounded-3xl hover:-translate-y-1 transition-transform duration-500 group">
+          <div className="flex items-center justify-between mb-10 pb-6 border-b border-slate-200/60">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)] border border-indigo-100 group-hover:scale-110 transition-transform duration-500">
+                <BarChart3 size={28} />
               </div>
-              <h3 className="text-xl font-bold text-slate-800">Leave Trend Curve</h3>
+              <h3 className="text-2xl font-extrabold text-slate-800 tracking-tight">Leave Trend Curve</h3>
             </div>
-            <div className="px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-md uppercase tracking-wide">
+            <div className="px-4 py-1.5 bg-slate-100/80 text-slate-600 text-sm font-black rounded-lg uppercase tracking-widest shadow-inner border border-slate-200">
               {selectedYear}
             </div>
           </div>
@@ -159,10 +164,12 @@ export default function EmployeeAnalytics() {
                   type="monotone"
                   dataKey="days"
                   stroke="#4f46e5"
-                  strokeWidth={4}
+                  strokeWidth={5}
                   fillOpacity={1}
                   fill="url(#colorDays)"
-                  activeDot={{ r: 8, strokeWidth: 0, fill: '#4f46e5' }}
+                  activeDot={{ r: 8, strokeWidth: 4, stroke: 'white', fill: '#4f46e5' }}
+                  animationCurve="ease-out"
+                  animationDuration={1500}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -170,12 +177,12 @@ export default function EmployeeAnalytics() {
         </div>
 
         {/* Distribution Chart (Pie Chart) */}
-        <div className="glass-panel p-8 animate-slide-up bg-white" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-center gap-3 mb-8 border-b border-slate-100 pb-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-sm">
-              <PieChartIcon size={24} />
+        <div className="glass-panel p-10 animate-slide-up delay-400 bg-white/60 backdrop-blur-3xl border-white/60 shadow-xl shadow-slate-200/40 rounded-3xl hover:-translate-y-1 transition-transform duration-500 group">
+          <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-200/60">
+            <div className="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)] border border-purple-100 group-hover:scale-110 transition-transform duration-500">
+              <PieChartIcon size={28} />
             </div>
-            <h3 className="text-xl font-bold text-slate-800">Leave Distribution</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 tracking-tight">Leave Distribution</h3>
           </div>
 
           <div className="h-[320px] w-full mt-4 flex items-center justify-center">
