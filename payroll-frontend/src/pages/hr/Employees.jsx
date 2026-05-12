@@ -481,7 +481,7 @@ export default function Employees() {
                   <div className="space-y-2 md:col-span-2">
                      <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Base Compensation (Annual/Monthly Scale)</label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
                       <input type="number" name="base_salary" value={formData.base_salary} onChange={handleInputChange} className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all font-bold text-slate-700 shadow-sm" placeholder="e.g. 75000" />
                     </div>
                   </div>

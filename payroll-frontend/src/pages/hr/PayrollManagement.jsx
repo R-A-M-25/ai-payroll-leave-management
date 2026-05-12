@@ -92,7 +92,7 @@ export default function PayrollManagement() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
   };
 
   return (
@@ -222,7 +222,7 @@ export default function PayrollManagement() {
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Monthly Salary</label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
                       <input 
                         type="number" 
                         required
