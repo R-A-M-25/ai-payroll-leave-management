@@ -1,4 +1,4 @@
-# AI-Enhanced Employee Payroll & Leave Management System
+# Employee Payroll & Leave Management System
 
 ## Project Overview
 
