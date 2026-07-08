@@ -3,6 +3,14 @@
 .env.*
 !.env.example
 
+# Backend environment files
+payroll-backend/.env
+payroll-backend/.env.*
+
+# Frontend environment files
+payroll-frontend/.env
+payroll-frontend/.env.*
+
 # Dependencies
 node_modules/
 **/node_modules/
